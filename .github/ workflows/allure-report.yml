@@ -1,37 +1,50 @@
-name: Run tests and publish report
-on: [push]
+name: Run tests and publish Allure report
+on:
+  push:
+    branches: [ main ]
+
 jobs:
-  test:
+  build-and-publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      # 1. Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          distribution: zulu
-          java-version: 17
+          node-version: 20
 
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Run tests and generate Allure results
       - name: Run tests
-        run: ./gradlew clean test
+        run: npm test -- --coverage --watchAll=false
 
-      - name: Load test report history
+      # 5. Load previous Allure report history
+      - name: Load previous Allure report history
         uses: actions/checkout@v3
         if: always()
         continue-on-error: true
         with:
           ref: gh-pages
-          path: gh-pages
+          path: allure-prev-history
 
-      - name: Build test report
+      # 6. Build Allure report
+      - name: Build Allure report
         uses: simple-elf/allure-report-action@v1.7
         if: always()
         with:
-          gh_pages: gh-pages
+          gh_pages: allure-prev-history
+          allure_results: allure-results
           allure_history: allure-history
-          allure_results: build/allure-results
 
-      - name: Publish test report
+      # 7. Publish Allure report
+      - name: Publish Allure report
         uses: peaceiris/actions-gh-pages@v3
         if: always()
         with:
