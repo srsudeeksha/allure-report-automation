@@ -3,11 +3,11 @@ name: Run tests and publish Allure report
 on:
   push:
     branches: [ main ]
-  workflow_dispatch:  # optional: allows manual trigger from Actions tab
+  workflow_dispatch: # optional manual trigger
 
 permissions:
-  contents: write  # needed to push to gh-pages
-  pages: write     # needed to deploy GitHub Pages
+  contents: write  # Needed to push to gh-pages
+  pages: write     # Needed to update GitHub Pages
 
 jobs:
   build-and-publish:
@@ -32,16 +32,18 @@ jobs:
       - name: Run tests and generate Allure results
         run: npm run test:allure
 
-      # 5️⃣ Build Allure report HTML
-      - name: Build Allure report
-        run: npx allure generate allure-results --clean -o allure-report
+      # 5️⃣ Ensure allure-report folder exists
+      - name: Check Allure report folder
+        run: |
+          if [ ! -d "allure-report" ]; then
+            echo "Error: allure-report folder not found!"
+            exit 1
+          fi
 
-      # 6️⃣ Deploy to GitHub Pages
-      - name: Publish Allure report to GitHub Pages
+      # 6️⃣ Publish Allure report to GitHub Pages
+      - name: Publish Allure report
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages        # branch where report will be published
-          publish_dir: allure-report       # folder containing generated report
-          user_name: "github-actions"
-          user_email: "github-actions@github.com"
+          publish_branch: gh-pages
+          publish_dir: allure-report
