@@ -11,11 +11,11 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: [
-      "C:\\Users\\Sudeeksha\\Desktop\\DEMO\\frontend\\src\\tests\\setup.ts",
-      "allure-vitest/setup" 
+      "./src/tests/setup.ts",  // Use relative path
+      "allure-vitest/setup"    // Allure Vitest setup
     ],
     reporters: [
-      "verbose",
+      "default",               // safer than verbose
       [
         "allure-vitest/reporter",
         {
@@ -25,4 +25,3 @@ export default defineConfig({
     ],
   },
 });
-
