@@ -1,0 +1,59 @@
+name: Run tests and publish Allure report
+
+on:
+  push:
+    branches: [ main ]   # Change if your main branch has a different name
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4️⃣ Run tests (generate Allure results)
+      # Make sure your test command actually produces allure-results folder
+      - name: Run tests and generate Allure results
+        run: npm run test:allure
+
+        # 👇 Example: if your package.json has a script like
+        # "test:allure": "npx jest --runInBand --reporters=jest-allure --output=allure-results"
+
+      # 5️⃣ Load previous Allure report history
+      - name: Load previous Allure report history
+        uses: actions/checkout@v3
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: allure-prev-history
+
+      # 6️⃣ Build Allure report
+      - name: Build Allure report
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+          gh_pages: allure-prev-history          # same name as in previous step
+          allure_results: allure-results         # folder where your allure results are generated
+          allure_history: allure-history         # folder where the new HTML report will be stored
+
+      # 7️⃣ Publish Allure report to gh-pages
+      - name: Publish Allure report
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
