@@ -8,7 +8,7 @@ const Home: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/');
+    navigate('/allure-report-automation');
   };
 
   return (

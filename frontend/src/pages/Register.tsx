@@ -61,7 +61,7 @@ const Register: React.FC = () => {
 
         <CardFooter className="text-center text-sm">
           Already have an account?{' '}
-          <Link to="/login" className="text-blue-600 hover:underline ml-1">Login</Link>
+          <Link to="/allure-report-automation" className="text-blue-600 hover:underline ml-1">Login</Link>
         </CardFooter>
       </Card>
     </div>
