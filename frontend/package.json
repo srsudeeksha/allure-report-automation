@@ -1,6 +1,5 @@
 {
   "name": "vite-ts-shadcn",
-  "homepage": "https://srsudeeksha.github.io/allure-report-automation",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
@@ -14,9 +13,7 @@
     "allure:clean": "rimraf allure-results allure-report",
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
-    "test:allure": "npm run allure:clean && vitest run && npm run allure:generate",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "test:allure": "npm run allure:clean && vitest run && npm run allure:generate"
   },
   "dependencies": {
     "@radix-ui/react-icons": "^1.3.2",
