@@ -16,8 +16,6 @@ jobs:
       # 1️⃣ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
@@ -25,27 +23,27 @@ jobs:
         with:
           node-version: 20
 
-      # 3️⃣ Install dependencies
-      - name: Install dependencies
-        working-directory: .
+      # 3️⃣ Install frontend dependencies
+      - name: Install frontend dependencies
         run: npm ci
+        working-directory: frontend
 
-      # 4️⃣ Run Allure tests
-      - name: Run Vitest tests and generate Allure report
+      # 4️⃣ Run Vitest tests with Allure
+      - name: Run Vitest tests
         run: npm run test:allure
-        working-directory: .
+        working-directory: frontend
 
-      # 5️⃣ Deploy Allure HTML to GitHub Pages
+      # 5️⃣ Deploy Allure HTML report to GitHub Pages
       - name: Deploy Allure report
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: allure-report
+          publish_dir: frontend/allure-report
           publish_branch: gh-pages
           force_orphan: true
 
-      # 6️⃣ Display report URL in Actions summary
-      - name: Show Report URL
+      # 6️⃣ Display live report URL
+      - name: Show Allure Report URL
         run: |
           echo "## ✅ Allure Report Published" >> $GITHUB_STEP_SUMMARY
           echo "View report here:" >> $GITHUB_STEP_SUMMARY
