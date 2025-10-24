@@ -1,17 +1,23 @@
-name: Run tests and publish Allure report
+name: Allure Vitest CI
 
 on:
   push:
-    branches: [ main ]   # Change if your main branch has a different name
+    branches: [ main ]
 
 jobs:
-  build-and-publish:
+  test-and-deploy:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      pages: write
+
     steps:
-      # 1️⃣ Checkout the repository
+      # 1️⃣ Checkout repo
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # 2️⃣ Setup Node.js
       - name: Setup Node.js
@@ -21,39 +27,26 @@ jobs:
 
       # 3️⃣ Install dependencies
       - name: Install dependencies
+        working-directory: .
         run: npm ci
 
-      # 4️⃣ Run tests (generate Allure results)
-      # Make sure your test command actually produces allure-results folder
-      - name: Run tests and generate Allure results
+      # 4️⃣ Run Allure tests
+      - name: Run Vitest tests and generate Allure report
         run: npm run test:allure
+        working-directory: .
 
-        # 👇 Example: if your package.json has a script like
-        # "test:allure": "npx jest --runInBand --reporters=jest-allure --output=allure-results"
-
-      # 5️⃣ Load previous Allure report history
-      - name: Load previous Allure report history
-        uses: actions/checkout@v3
-        if: always()
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: allure-prev-history
-
-      # 6️⃣ Build Allure report
-      - name: Build Allure report
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
-        with:
-          gh_pages: allure-prev-history          # same name as in previous step
-          allure_results: allure-results         # folder where your allure results are generated
-          allure_history: allure-history         # folder where the new HTML report will be stored
-
-      # 7️⃣ Publish Allure report to gh-pages
-      - name: Publish Allure report
+      # 5️⃣ Deploy Allure HTML to GitHub Pages
+      - name: Deploy Allure report
         uses: peaceiris/actions-gh-pages@v3
-        if: always()
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_branch: gh-pages
           publish_dir: allure-report
+          publish_branch: gh-pages
+          force_orphan: true
+
+      # 6️⃣ Display report URL in Actions summary
+      - name: Show Report URL
+        run: |
+          echo "## ✅ Allure Report Published" >> $GITHUB_STEP_SUMMARY
+          echo "View report here:" >> $GITHUB_STEP_SUMMARY
+          echo "- [Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
