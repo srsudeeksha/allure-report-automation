@@ -10,16 +10,13 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: [
-      "./src/tests/setup.ts",  // Use relative path
-      "allure-vitest/setup"    // Allure Vitest setup
-    ],
+    setupFiles: ["./src/tests/setup.ts"],
     reporters: [
-      "default",               // safer than verbose
+      "default",
       [
         "allure-vitest/reporter",
         {
-          resultsDir: "allure-results", // Output folder for allure results
+          resultsDir: "./allure-results",
         },
       ],
     ],
