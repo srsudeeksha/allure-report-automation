@@ -85,7 +85,7 @@ const Login: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             {/* Error Alert */}
             {error && (
               <Alert variant="destructive">
