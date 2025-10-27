@@ -1,18 +1,29 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+// App.tsx
+// Main application component with routing configuration
+
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import PrivateRoute from './utils/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
+import ChatWithAI from './pages/ChatWithAI';
+import FriendsPage from './pages/FriendsPage';
+import './App.css';
 
-import PrivateRoute from '../PrivateRoute';
-
-function App() {
+/**
+ * Main App component
+ * Configures routing for the entire application
+ */
+const App: React.FC = () => {
   return (
-    <BrowserRouter>
+    <Router basename="/allure-report-automation">
       <Routes>
-        <Route path="/allure-report-automation" element={<Login />} />
-        <Route path="/allure-report-automation/register" element={<Register />} />
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        {/* Protected route */}
+        {/* Protected Routes */}
         <Route
           path="/home"
           element={
@@ -21,9 +32,31 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/chat"
+          element={
+            <PrivateRoute>
+              <ChatWithAI />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/friends"
+          element={
+            <PrivateRoute>
+              <FriendsPage />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Default Redirect */}
+        <Route path="/" element={<Navigate to="/home" replace />} />
+        
+        {/* Catch-all route - redirect to home */}
+        <Route path="*" element={<Navigate to="/home" replace />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
-}
+};
 
 export default App;
