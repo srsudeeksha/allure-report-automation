@@ -2,7 +2,7 @@ name: Frontend & Allure Report Deployment
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   build-and-deploy:
@@ -32,30 +32,19 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      # 5️⃣ Run Vitest tests with Allure (preserve history)
-      - name: Run Vitest tests with Allure
-        run: |
-          mkdir -p frontend/allure-results/history
-          if [ -d "frontend/allure-report/history" ]; then
-            echo "📁 Copying previous Allure history..."
-            cp -r frontend/allure-report/history frontend/allure-results/
-          fi
-
-          echo "🧪 Running tests and generating Allure results..."
-          npm run test:allure
-
-          echo "📊 Generating Allure report..."
-          npx allure generate frontend/allure-results --clean -o frontend/allure-report
+      # 5️⃣ Run Vitest tests with Allure
+      - name: Run Vitest tests
+        run: npm run test:allure
         working-directory: frontend
 
-      # 6️⃣ Prepare combined deployment folder (frontend + Allure report)
+      # 6️⃣ Prepare combined deployment folder
       - name: Prepare deployment folder
         run: |
           mkdir -p public/allure-report
           cp -r frontend/dist/* public/
           cp -r frontend/allure-report/* public/allure-report/
 
-      # 7️⃣ Deploy to GitHub Pages
+      # 7️⃣ Deploy both frontend + allure report to gh-pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -64,7 +53,7 @@ jobs:
           publish_dir: public
           force_orphan: true
 
-      # 8️⃣ Deployment summary
+      # 8️⃣ Display deployment summary
       - name: Show Deployment URLs
         run: |
           echo "## 🚀 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
