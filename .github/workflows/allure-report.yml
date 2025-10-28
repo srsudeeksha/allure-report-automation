@@ -32,72 +32,39 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-      # 5️⃣ Get timestamp for report version
-      - name: Get timestamp
-        id: time
-        run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M-%S')" >> $GITHUB_OUTPUT
-
-      # 6️⃣ Fetch existing gh-pages branch (for report history)
-      - name: Fetch existing gh-pages
-        run: |
-          git fetch origin gh-pages --depth=1 || true
-          mkdir -p old-gh-pages
-          git worktree add old-gh-pages gh-pages || true
-
-      # 7️⃣ Restore allure history
-      - name: Restore allure history
+      # 5️⃣ Run Vitest tests with Allure (preserve history)
+      - name: Run Vitest tests with Allure
         run: |
           mkdir -p frontend/allure-results/history
-          if [ -d "old-gh-pages/allure-history" ]; then
-            cp -r old-gh-pages/allure-history frontend/allure-results/history || true
+          if [ -d "frontend/allure-report/history" ]; then
+            echo "📁 Copying previous Allure history..."
+            cp -r frontend/allure-report/history frontend/allure-results/
           fi
 
-      # 8️⃣ Run Vitest tests with Allure
-      - name: Run Vitest tests
-        run: npm run test:allure
+          echo "🧪 Running tests and generating Allure results..."
+          npm run test:allure
+
+          echo "📊 Generating Allure report..."
+          npx allure generate frontend/allure-results --clean -o frontend/allure-report
         working-directory: frontend
 
-      # 9️⃣ Generate Allure HTML report
-      - name: Generate Allure HTML Report
-        run: |
-          npm run allure:generate || npx allure generate frontend/allure-results --clean -o frontend/allure-report
-
-      # 🔟 Prepare deployment folder
+      # 6️⃣ Prepare combined deployment folder (frontend + Allure report)
       - name: Prepare deployment folder
         run: |
-          mkdir -p public/allure-report/${{ steps.time.outputs.timestamp }} public/allure-history
+          mkdir -p public/allure-report
           cp -r frontend/dist/* public/
-          cp -r frontend/allure-report/* public/allure-report/${{ steps.time.outputs.timestamp }}/
-          cp -r frontend/allure-report/history/* public/allure-history/ || true
+          cp -r frontend/allure-report/* public/allure-report/
 
-      # 1️⃣1️⃣ Generate Allure index.html (list of all reports)
-      - name: Generate Allure Reports Index
-        run: |
-          REPORT_DIR="public/allure-report"
-          INDEX_FILE="$REPORT_DIR/index.html"
-
-          echo "<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Allure Report History</title>" > $INDEX_FILE
-          echo "<style>body{font-family:Arial,sans-serif;padding:2rem;background:#f8f9fa;color:#333;}h1{color:#0078d7;}a{display:block;margin:8px 0;color:#0366d6;text-decoration:none;}a:hover{text-decoration:underline;}</style>" >> $INDEX_FILE
-          echo "</head><body><h1>Allure Report History</h1><p>Click a report timestamp to view details:</p><ul>" >> $INDEX_FILE
-
-          for dir in $(ls -d $REPORT_DIR/*/ | sort -r); do
-            dirname=$(basename $dir)
-            echo "<li><a href='./$dirname/'>$dirname</a></li>" >> $INDEX_FILE
-          done
-
-          echo "</ul></body></html>" >> $INDEX_FILE
-
-      # 1️⃣2️⃣ Deploy to GitHub Pages
+      # 7️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: public
-          keep_files: true
-          force_orphan: false
+          force_orphan: true
 
-      # 1️⃣3️⃣ Show deployment URLs
+      # 8️⃣ Deployment summary
       - name: Show Deployment URLs
         run: |
           echo "## 🚀 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
@@ -105,11 +72,5 @@ jobs:
           echo "**Frontend App:**" >> $GITHUB_STEP_SUMMARY
           echo "- [View App](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Latest Allure Report:**" >> $GITHUB_STEP_SUMMARY
-          echo "- [${{ steps.time.outputs.timestamp }}](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/${{ steps.time.outputs.timestamp }}/)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**All Reports Index:**" >> $GITHUB_STEP_SUMMARY
-          echo "- [View All Reports](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Allure History:**" >> $GITHUB_STEP_SUMMARY
-          echo "- [View History Folder](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-history/)" >> $GITHUB_STEP_SUMMARY
+          echo "**Allure Report:**" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/)" >> $GITHUB_STEP_SUMMARY
