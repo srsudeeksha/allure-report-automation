@@ -1,19 +1,18 @@
-name: Allure Vitest CI
+name: Frontend & Allure Report Deployment
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  test-and-deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
       pages: write
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -28,23 +27,39 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      # 4️⃣ Run Vitest tests with Allure
+      # 4️⃣ Build the frontend app
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+
+      # 5️⃣ Run Vitest tests with Allure
       - name: Run Vitest tests
         run: npm run test:allure
         working-directory: frontend
 
-      # 5️⃣ Deploy Allure HTML report to GitHub Pages
-      - name: Deploy Allure report
+      # 6️⃣ Prepare combined deployment folder
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p public/allure-report
+          cp -r frontend/dist/* public/
+          cp -r frontend/allure-report/* public/allure-report/
+
+      # 7️⃣ Deploy both frontend + allure report to gh-pages
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: frontend/allure-report
-          publish_branch: main
+          publish_branch: gh-pages
+          publish_dir: public
           force_orphan: true
 
-      # 6️⃣ Display live report URL
-      - name: Show Allure Report URL
+      # 8️⃣ Display deployment summary
+      - name: Show Deployment URLs
         run: |
-          echo "## ✅ Allure Report Published" >> $GITHUB_STEP_SUMMARY
-          echo "View report here:" >> $GITHUB_STEP_SUMMARY
-          echo "- [Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "## 🚀 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Frontend App:**" >> $GITHUB_STEP_SUMMARY
+          echo "- [View App](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Allure Report:**" >> $GITHUB_STEP_SUMMARY
+          echo "- [View Allure Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/)" >> $GITHUB_STEP_SUMMARY
