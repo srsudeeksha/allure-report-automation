@@ -45,7 +45,7 @@ describe('Login Component', () => {
     renderComponent();
 
     // Check for header elements
-    expect(screen.getByText(/Welcome Back/i)).toBeInTheDocument();
+    expect(screen.getByText(/Welcome to Weather App/i)).toBeInTheDocument();
 
     // Check for input fields
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
