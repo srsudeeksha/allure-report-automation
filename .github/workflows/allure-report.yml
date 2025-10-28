@@ -23,54 +23,53 @@ jobs:
           node-version: 20
 
       # 3️⃣ Install frontend dependencies
-      - name: Install frontend dependencies
+      - name: Install dependencies
         run: npm ci
         working-directory: frontend
 
-      # 4️⃣ Build the frontend app
+      # 4️⃣ Build frontend app
       - name: Build frontend
         run: npm run build
         working-directory: frontend
 
-      # 5️⃣ Run Vitest tests with Allure
+      # 5️⃣ Fetch previous gh-pages branch for allure-history
+      - name: Fetch existing gh-pages (for allure-history)
+        run: |
+          git fetch origin gh-pages --depth=1
+          mkdir -p old-gh-pages
+          git worktree add old-gh-pages gh-pages || true
+
+      # 6️⃣ Copy old allure-history to keep history
+      - name: Restore allure history
+        run: |
+          mkdir -p frontend/allure-report/history
+          if [ -d "old-gh-pages/allure-history" ]; then
+            cp -r old-gh-pages/allure-history frontend/allure-report/history || true
+          fi
+
+      # 7️⃣ Run Vitest tests with Allure
       - name: Run Vitest tests
         run: npm run test:allure
         working-directory: frontend
 
-      # 6️⃣ Prepare deployment folders
-      - name: Prepare combined deployment folder
+      # 8️⃣ Prepare combined deployment folder
+      - name: Prepare deployment folder
         run: |
-          DATE=$(date +'%Y-%m-%d-%H-%M-%S')
-
-          # Create required directories
-          mkdir -p public/allure-report
-          mkdir -p public/allure-history
-
-          # Copy frontend build
+          mkdir -p public/allure-report public/allure-history
           cp -r frontend/dist/* public/
-
-          # Preserve previous reports in allure-history
-          if [ -d public/allure-report ]; then
-            mv public/allure-report/* public/allure-history/ || true
-          fi
-
-          # Copy today’s report into allure-report
           cp -r frontend/allure-report/* public/allure-report/
+          cp -r frontend/allure-report/history/* public/allure-history/ || true
 
-          # Save timestamp marker
-          echo "$DATE" > public/allure-report/generated_on.txt
-
-      # 7️⃣ Deploy to GitHub Pages (preserve old history)
+      # 9️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: public
-          keep_files: true
-          commit_message: "Auto-deploy: frontend + allure reports ($(date +'%Y-%m-%d %H:%M:%S'))"
+          force_orphan: true
 
-      # 8️⃣ Display deployment summary
+      # 🔟 Display Deployment URLs
       - name: Show Deployment URLs
         run: |
           echo "## 🚀 Deployment Complete!" >> $GITHUB_STEP_SUMMARY
@@ -78,8 +77,8 @@ jobs:
           echo "**Frontend App:**" >> $GITHUB_STEP_SUMMARY
           echo "- [View App](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Today's Allure Report:**" >> $GITHUB_STEP_SUMMARY
+          echo "**Allure Report (Today):**" >> $GITHUB_STEP_SUMMARY
           echo "- [View Report](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-report/)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**All Previous Reports (Archive):**" >> $GITHUB_STEP_SUMMARY
-          echo "- [Allure History](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-history/)" >> $GITHUB_STEP_SUMMARY
+          echo "**Allure History (Past Reports):**" >> $GITHUB_STEP_SUMMARY
+          echo "- [View History](https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/allure-history/)" >> $GITHUB_STEP_SUMMARY
