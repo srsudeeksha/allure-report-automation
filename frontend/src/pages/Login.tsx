@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from '../components/ui/alert';
 import { Cloud, Mail, Lock } from 'lucide-react';
 import { authAPI } from '../services/api';
 
+
 /**
  * Login page component
  * Handles user authentication
