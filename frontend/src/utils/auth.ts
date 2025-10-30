@@ -1,5 +1,6 @@
 export function getStoredToken(): string | null {
-  return localStorage.getItem('token');
+  // ✅ Use sessionStorage instead of localStorage
+  return sessionStorage.getItem('token');
 }
 
 export function isTokenValid(token: string | null): boolean {
@@ -20,4 +21,3 @@ export function isTokenValid(token: string | null): boolean {
 export function isAuthenticated(): boolean {
   return isTokenValid(getStoredToken());
 }
-

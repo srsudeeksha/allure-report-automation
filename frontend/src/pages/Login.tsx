@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // pages/Login.tsx
 
 import React, { useState } from 'react';
