@@ -31,6 +31,16 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+// Health check endpoint
+app.get('/health', async (req, res) => {
+  try {
+    await pool.query('SELECT 1');
+    res.status(200).json({ status: 'ok', db: 'up', message: 'Server is healthy' });
+  } catch (error) {
+    res.status(500).json({ status: 'error', db: 'down', message: 'Server is unhealthy' });
+  }
+});
+
 // Database initialization
 async function initDatabase() {
   try {
