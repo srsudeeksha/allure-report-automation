@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 // pages/Login.tsx
-// Updated login page with modern design
 
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
@@ -11,7 +9,6 @@ import { Button } from '../components/ui/button';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { Cloud, Mail, Lock } from 'lucide-react';
 import { authAPI } from '../services/api';
-
 
 /**
  * Login page component
@@ -57,12 +54,14 @@ const Login: React.FC = () => {
       // Call login API
       const response = await authAPI.login(formData.email, formData.password);
 
-      // Store token and user data
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      // ✅ Store token and user data in sessionStorage
+      // (sessionStorage clears automatically when browser/tab closes)
+      sessionStorage.setItem('token', response.token);
+      sessionStorage.setItem('user', JSON.stringify(response.user));
 
       // Redirect to home page
       navigate('/home', { replace: true });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(
         err.response?.data?.message || 'Invalid credentials. Please try again.'
