@@ -11,7 +11,7 @@ RUN npm ci --only=production
 COPY src ./src
 
 # Expose backend port
-EXPOSE 5000
+EXPOSE 8000
 
 # Environment
 ENV NODE_ENV=production
