@@ -1,6 +1,8 @@
+version: '3.3'
+
 services:
   db:
-    image: mysql:8.0
+    image: mysql:8.0.32
     container_name: mysql-db
     restart: unless-stopped
     environment:
@@ -31,10 +33,7 @@ services:
       DB_NAME: weatherapp
       JWT_SECRET: supersecretjwt
     depends_on:
-      db:
-        condition: service_healthy
+      - db
 
 volumes:
   db_data:
-
-
