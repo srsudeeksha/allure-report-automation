@@ -1,5 +1,9 @@
 # Deployment Guide
 
+## Production URL
+
+**Application Domain**: `interns.voltusfreight.com`
+
 ## Server Information
 
 - **Server Address**: `172.16.10.15`
@@ -78,10 +82,16 @@ node-backend   allure-report-automation-backend   "docker-entrypoint.s…"   bac
 
 ### 8. Check Application Health
 
-Test the health endpoint:
+Test the health endpoint from the server:
 
 ```bash
 curl http://localhost:8000/health
+```
+
+Or test from external network:
+
+```bash
+curl http://interns.voltusfreight.com/health
 ```
 
 Expected response:
@@ -115,17 +125,35 @@ docker-compose logs -f backend
 
 Once deployed, the application is accessible at:
 
-- **Backend API**: `http://172.16.10.15:8000`
+### Production URLs (External Access)
+
+- **Backend API**: `http://interns.voltusfreight.com`
+- **Health Check**: `http://interns.voltusfreight.com/health`
+
+### Internal Server URLs (For Server Access)
+
+- **Backend API**: `http://172.16.10.15:8000` or `http://localhost:8000`
 - **Health Check**: `http://172.16.10.15:8000/health`
-- **MySQL Database**: `172.16.10.15:3307`
+- **MySQL Database**: `172.16.10.15:3307` (internal access only)
 
 ### API Endpoints
+
+All endpoints are accessible via the production domain `interns.voltusfreight.com`:
 
 - `GET /health` - Health check with database connectivity test
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/users` - Get all users (requires JWT authentication)
 - `GET /api/users/me` - Get current user profile (requires JWT authentication)
+
+**Example**:
+```bash
+# External access
+curl http://interns.voltusfreight.com/health
+
+# From server
+curl http://localhost:8000/health
+```
 
 ## Configuration
 
@@ -243,6 +271,8 @@ docker system df
 
 ## Important Notes
 
+- **Production Domain**: The application is publicly accessible at `interns.voltusfreight.com`
+- **DNS/Reverse Proxy**: The domain is configured to point to the server and route traffic to port 8000
 - **Docker Compatibility**: This setup is specifically configured for Docker 24.0.2 and Docker Compose 1.23.1
 - **MySQL Version**: Uses MySQL 8.0.32 (not latest) for manifest compatibility
 - **Node.js Version**: Uses Node.js 18.17.1-alpine (not latest) for manifest compatibility
