@@ -1,19 +1,19 @@
+version: '3.3'
+
 services:
   db:
-    image: mysql:8.0
+    image: mysql:8.0.32
     container_name: mysql-db
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: Apple#123
       MYSQL_DATABASE: weatherapp
-      MYSQL_USER: appuser
-      MYSQL_PASSWORD: apppassword
     ports:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-prootpassword"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pApple#123"]
       interval: 10s
       timeout: 5s
       retries: 20
@@ -24,19 +24,16 @@ services:
     container_name: node-backend
     restart: unless-stopped
     ports:
-      - "5000:5000"
+      - "8000:8000"
     environment:
-      PORT: 5000
+      PORT: 8000
       DB_HOST: db
-      DB_USER: appuser
-      DB_PASSWORD: apppassword
+      DB_USER: root
+      DB_PASSWORD: Apple#123
       DB_NAME: weatherapp
       JWT_SECRET: supersecretjwt
     depends_on:
-      db:
-        condition: service_healthy
+      - db
 
 volumes:
   db_data:
-
-
