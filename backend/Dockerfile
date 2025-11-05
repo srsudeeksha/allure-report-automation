@@ -8,7 +8,7 @@ COPY package*.json ./
 RUN npm ci --only=production
 
 # Copy source code
-COPY src ./src
+COPY . .
 
 # Expose backend port
 EXPOSE 8000
